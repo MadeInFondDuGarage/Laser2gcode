@@ -2412,11 +2412,11 @@ class laser_gcode(inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("",   "--GRBL-auto-laser",                 action="store", type="inkbool",         dest="GRBL-auto-laser",                     default=True,                           help="Activate laser options for GRBL")
+        self.OptionParser.add_option("",   "--GRBL-auto-laser",                 action="store", type="inkbool",         dest="GRBL_auto_laser",                     default=True,                           help="Activate laser options for GRBL")
         self.OptionParser.add_option("-d", "--directory",                       action="store", type="string",          dest="directory",                           default="",                             help="Output directory")
         self.OptionParser.add_option("-f", "--filename",                        action="store", type="string",          dest="file",                                default="output.gcode",                 help="File name")
         self.OptionParser.add_option("",   "--add-numeric-suffix-to-filename",  action="store", type="inkbool",         dest="add_numeric_suffix_to_filename",      default=False,                          help="Add numeric suffix to file name")
-        self.OptionParser.add_option("",   "--laser-command",                   action="store", type="string",          dest="laser_command",                       default="M03",                          help="Laser gcode command")
+        self.OptionParser.add_option("",   "--laser-on-command",                action="store", type="string",          dest="laser_on_command",                       default="M03",                          help="Laser gcode command")
         self.OptionParser.add_option("",   "--laser-off-command",               action="store", type="string",          dest="laser_off_command",                   default="M05",                          help="Laser gcode end command")
         self.OptionParser.add_option("",   "--laser-speed",                     action="store", type="int",             dest="laser_speed",                         default="750",                          help="Laser speed (mm/min)")
         self.OptionParser.add_option("",   "--travel-speed",                    action="store", type="string",          dest="travel_speed",                        default="3000",                         help="Travel speed (mm/min)")
@@ -2655,7 +2655,7 @@ class laser_gcode(inkex.Effect):
             s, si = curve[i-1], curve[i]
             feed = f if lg not in ['G01','G02','G03'] else ''
             if s[1] == 'move'and (passe == 'start' or passe == 'all'):
-                g += "G0 " + c(si[0]) + "\n" + "G4 P0 \n" + self.options.laser_command + " S" + stroke_power + "\nG4 P" + self.options.power_delay + "\n" #MOD David G1 en G0
+                g += "G0 " + c(si[0]) + "\n" + "G4 P0 \n" + self.options.laser_on_command + " S" + stroke_power + "\nG4 P" + self.options.power_delay + "\n" #MOD David G1 en G0
                 lg = 'G00'
             elif s[1] == 'end'and (passe == 'end'or passe == 'all'):
                 g += tool['gcode after path'] + "\n"
@@ -3039,7 +3039,17 @@ class laser_gcode(inkex.Effect):
             if objet.attrib.has_key('style'): #test si j'ai un element de style car si jamais masque il n'existe pas forcement
                 style= simplestyle.parseStyle(objet.get('style')) # je passe le dico
                 if style.has_key('stroke-width'): #je verifie que dans le sous dico, il existe l'information, car si jamais masquer, il n'apparait pas
-                    return style['stroke-width']
+                    try:
+                        return float(style['stroke-width'])
+                    except ValueError:
+                        #je suis en erreur je ne garde que les 4 premiers caractere et je retente
+                        Text=style['stroke-width'][:4]
+                        try:
+                            return float(Text)
+                        except ValueError:
+                            inkex.errormsg("Erreur de conversion ligne 3050 lors de l'acquisition de la largeur de ligne")
+                        
+                    # return float(style['stroke-width'])
                 else:
                     return 1 #sinon, masquer je renvoie faux
 
@@ -3105,6 +3115,9 @@ class laser_gcode(inkex.Effect):
         self.check_dir()
         gcode = ""
 
+        if self.options.GRBL_auto_laser :
+            gcode += "$32=1" + "\n"
+            
         biarc_group = inkex.etree.SubElement( self.selected_paths.keys()[0] if len(self.selected_paths.keys())>0 else self.layers[0], inkex.addNS('g','svg') )
         biarc_group.set(inkex.addNS('label','inkscape'),'Preview group') #MOD David groupe pour le chemin de previsualisation
 
@@ -3156,6 +3169,9 @@ class laser_gcode(inkex.Effect):
                             gcode += self.generate_gcode(curve, layer, 0,stroke_power,passe)
                         self.draw_curve(curve, layer,get_label(layer),biarc_group)
 
+        if self.options.GRBL_auto_laser:
+            gcode += "$32=0" + "\n"
+        
         self.export_gcode(gcode)
 
 ################################################################################
@@ -3259,7 +3275,7 @@ class laser_gcode(inkex.Effect):
             "id": "Laser Engraver",
             "penetration feed": self.options.laser_speed,
             "feed": self.options.laser_speed,
-            "gcode before path": "", #Mod David passage dans la partie path ("G4 P0 \n" + self.options.laser_command + " S" + str(int(self.options.laser_power)) + "\nG4 P" + self.options.power_delay),
+            "gcode before path": "", #Mod David passage dans la partie path ("G4 P0 \n" + self.options.laser_on_command + " S" + str(int(self.options.laser_power)) + "\nG4 P" + self.options.power_delay),
             "gcode after path": ("G4 P0 \n" + self.options.laser_off_command + " S0" + "\n" + "G0 F" + self.options.travel_speed), #MOD David # "gcode after path": ("G4 P0 \n" + self.options.laser_off_command + " S0" + "\n" + "G1 F" + self.options.travel_speed),
         }
 

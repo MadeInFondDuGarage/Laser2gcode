@@ -7,7 +7,7 @@
     <param name="tab" type="notebook">
         <page name="Bases" _gui-text="Bases">
     	<param name="GRBL-auto-laser" type="boolean" _gui-text="Laser options activate in GRBL">true</param>
-    	<param name="laser-command" type="string" _gui-text="Laser ON Command:">M03</param>
+    	<param name="laser-on-command" type="string" _gui-text="Laser ON Command:">M03</param>
     	<param name="laser-off-command" type="string" _gui-text="Laser OFF Command:">M05</param>
     	<param name="travel-speed" type="int" min="0" max="10000" _gui-text="Travel Speed (mm/min or in/min):">3000</param>
     	<param name="laser-speed" type="int" min="0" max="10000" _gui-text="Laser Speed (mm/min or in/min):">750</param>
