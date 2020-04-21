@@ -18,7 +18,7 @@
         <page name="Options" _gui-text="Options">
     	<param name="directory" type="string" _gui-text="Directory:"></param>
     	<param name="add-numeric-suffix-to-filename" type="boolean" _gui-text="Add numeric suffix to filename">true</param>
-    	<param name="power-delay" type="float" min="0" max="1000" _gui-text="Power-On Delay (ms or s):">0</param>
+    	<param name="power-delay" type="float" min="0" max="1000" _gui-text="Power-On Delay (s,ms):">0</param>
     	<param name="passes" type="int" min="1" max="100" _gui-text="Passes:">1</param>
     	<param name="red-for-passes" type="boolean" _gui-text="nbr of passe with red stroke">true</param>
     	<param name="pass-depth" type="float" min="0" max="10" _gui-text="Pass Depth (mm or in):">1</param>

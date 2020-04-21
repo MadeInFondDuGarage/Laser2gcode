@@ -2655,7 +2655,12 @@ class laser_gcode(inkex.Effect):
             s, si = curve[i-1], curve[i]
             feed = f if lg not in ['G01','G02','G03'] else ''
             if s[1] == 'move'and (passe == 'start' or passe == 'all'):
-                g += "G0 " + c(si[0]) + "\n" + "G4 P0 \n" + self.options.laser_on_command + " S" + stroke_power + "\nG4 P" + self.options.power_delay + "\n" #MOD David G1 en G0
+                g += "G0 " + c(si[0]) +"\n" 
+                if float(self.options.power_delay) > 0.01 : #suppression de la pause si egal a 0
+                    g += "G4 P0 \n"
+                g += self.options.laser_on_command + " S" + stroke_power + "\n"
+                if float(self.options.power_delay) > 0.01 :
+                    g += "G4 P" + self.options.power_delay[:4] + "\n" #MOD David G1 en G0 suppression de la pause si égal a 0 et limitte de la taille du float a 4chiffres
                 lg = 'G00'
             elif s[1] == 'end'and (passe == 'end'or passe == 'all'):
                 g += tool['gcode after path'] + "\n"
